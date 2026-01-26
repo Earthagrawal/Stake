@@ -1,4 +1,4 @@
-# 🎲 STAKE: The Data Prediction Game
+# 🎲 MonStake: The Data Prediction Game
 
 > **Predict. Win. Repeat.**  
 > A high-speed Web3 prediction market built on the Monad Blockchain.
