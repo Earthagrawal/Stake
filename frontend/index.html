@@ -1,0 +1,1368 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STAKE</title>
+    <!-- Ethers.js Library (using unpkg CDN) -->
+    <script src="https://unpkg.com/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+            margin: 0;
+        }
+
+        .container {
+            background: #1a1a1a;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
+            flex: 1;
+            margin: 100px auto 40px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            color: #fff;
+            margin-bottom: 10px;
+            font-size: 42px;
+            font-weight: 800;
+            letter-spacing: 2px;
+        }
+
+        .header p {
+            color: #aaa;
+            font-size: 16px;
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .navbar-brand {
+            font-size: 28px;
+            font-weight: 800;
+            color: #667eea;
+            letter-spacing: 1px;
+        }
+
+        .navbar-actions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .btn-connect {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .btn-connect:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-connect.connected {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            cursor: default;
+        }
+
+        .btn-rules {
+            background: transparent;
+            border: 2px solid #667eea;
+            color: #667eea;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-rules:hover {
+            background: #667eea;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        /* Data Display Card */
+        .data-card {
+            background: linear-gradient(135deg, #2a2a3e 0%, #1a1a2e 100%);
+            border: 2px solid #667eea;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+        }
+
+        .data-card-title {
+            color: #667eea;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .data-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .data-item {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .data-label {
+            color: #aaa;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .data-value {
+            color: #fff;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .bet-section {
+            margin-top: 30px;
+        }
+
+        .bet-amount-input {
+            width: 100%;
+            padding: 18px;
+            border: 2px solid #444;
+            border-radius: 12px;
+            font-size: 20px;
+            transition: all 0.3s ease;
+            background: #2a2a2a;
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .bet-amount-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        }
+
+        .bet-amount-input::placeholder {
+            color: #666;
+        }
+
+        .prediction-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .prediction-btn {
+            padding: 20px;
+            border: 3px solid #444;
+            border-radius: 12px;
+            background: #2a2a2a;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 700;
+            font-size: 18px;
+            color: #ccc;
+        }
+
+        .prediction-btn:hover {
+            border-color: #667eea;
+            background: #333;
+            color: #fff;
+            transform: translateY(-2px);
+        }
+
+        .prediction-btn.selected {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .button-stake {
+            width: 100%;
+            padding: 20px;
+            border: none;
+            border-radius: 12px;
+            font-size: 22px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 20px;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            color: white;
+        }
+
+        .button-stake:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.4);
+        }
+
+        .button-stake:disabled {
+            background: #444;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status-message {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            word-break: break-word;
+            font-weight: 600;
+        }
+
+        .status-message.success {
+            background: rgba(72, 187, 120, 0.2);
+            color: #48bb78;
+            border: 2px solid #48bb78;
+        }
+
+        .status-message.error {
+            background: rgba(255, 107, 107, 0.2);
+            color: #ff6b6b;
+            border: 2px solid #ff6b6b;
+        }
+
+        .status-message.info {
+            background: rgba(102, 126, 234, 0.2);
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Timer Bar */
+        .timer-container {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            margin-top: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .timer-bar {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, #00ff88, #ffff00, #ff0000);
+            transform-origin: left;
+            transition: width 0.1s linear;
+        }
+
+        .timer-text {
+            position: absolute;
+            top: -20px;
+            right: 0;
+            font-size: 12px;
+            color: #ff4444;
+            font-weight: bold;
+            font-family: 'Space Mono', monospace;
+        }
+
+        /* Toggle Switch */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 22px;
+        }
+
+        .loader {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid #fff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Rules Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: #1a1a1a;
+            border: 2px solid #667eea;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.active .modal {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .modal-title {
+            color: #667eea;
+            font-size: 28px;
+            font-weight: 800;
+        }
+
+        .modal-close {
+            background: transparent;
+            border: 2px solid #667eea;
+            color: #667eea;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-close:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .modal-content {
+            color: #ccc;
+            line-height: 1.8;
+        }
+
+        .modal-content h3 {
+            color: #667eea;
+            margin: 20px 0 10px;
+            font-size: 20px;
+        }
+
+        .modal-content ul {
+            margin-left: 20px;
+            margin-bottom: 20px;
+        }
+
+        .modal-content li {
+            margin-bottom: 10px;
+        }
+
+        .rules-highlight {
+            background: rgba(102, 126, 234, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+            margin: 20px 0;
+        }
+
+        .footer {
+            background: rgba(0, 0, 0, 0.5);
+            border-top: 1px solid rgba(102, 126, 234, 0.2);
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            font-size: 12px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .empty-state-text {
+            font-size: 18px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="navbar-brand">STAKE</div>
+        <div class="navbar-actions">
+            <button class="btn-rules" id="rulesBtn" title="Game Rules">?</button>
+            <button class="btn-connect" id="connectWalletBtn">Connect Wallet</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="header">
+            <h1>STAKE</h1>
+            <p>Predict. Win. Repeat.</p>
+        </div>
+
+        <!-- Status Messages -->
+        <div id="statusContainer"></div>
+
+        <!-- Main Game Area -->
+        <div id="mainGame" class="hidden">
+            <!-- Data Display Card -->
+            <div class="data-card" id="dataCard">
+                <div class="data-card-title">
+                    📊 Prediction Data
+                    <span id="timerDigits" style="float: right; color: #ff0000; font-size: 14px;">10s</span>
+                </div>
+                <div class="timer-container" id="timerContainer">
+                    <div class="timer-bar" id="timerBar"></div>
+                </div>
+                <div class="empty-state" id="emptyState">
+                    <div class="empty-state-icon">💎</div>
+                    <div class="empty-state-text">Enter bet amount to see prediction data</div>
+                </div>
+                <div class="data-grid hidden" id="dataGrid"></div>
+            </div>
+
+            <!-- Bet Section -->
+            <div class="bet-section">
+                <input id="betAmountInput" type="number" class="bet-amount-input" placeholder="Enter bet amount in MON"
+                    step="0.01" min="0.01">
+
+                <div class="prediction-options">
+                    <button class="prediction-btn" data-prediction="false">Income ≤ 50K</button>
+                    <button class="prediction-btn" data-prediction="true">Income > 50K</button>
+                </div>
+
+                <button id="placeBetBtn" class="button-stake" disabled>STAKE NOW</button>
+            </div>
+        </div>
+
+        <!-- Arcade Mode Panel -->
+        <div id="arcadePanel" class="hidden"
+            style="background: linear-gradient(135deg, #2a2a3e 0%, #1a1a2e 100%); border: 2px solid #667eea; border-radius: 16px; padding: 30px; margin-bottom: 30px; box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);">
+            <div
+                style="color: #667eea; font-size: 18px; font-weight: 700; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px;">
+                ⚡ Arcade Mode</div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <label style="color: #aaa; font-size: 14px;">Enable Fast Betting:</label>
+                <input type="checkbox" id="arcadeModeToggle" style="width: 40px; height: 22px; cursor: pointer;">
+            </div>
+            <div style="color: #999; font-size: 12px; margin-bottom: 15px;">Deposit MON to your session wallet for
+                instant betting</div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                <button id="depositBtn" class="button-stake" style="width: 100%; margin: 0;">💰 Deposit</button>
+                <button id="withdrawBtn" class="button-stake"
+                    style="width: 100%; margin: 0; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">💸
+                    Withdraw All</button>
+            </div>
+            <div style="color: #667eea; font-size: 12px;">Balance: <span id="arcadeBalance">0</span> MON</div>
+        </div>
+
+        <!-- Connect Prompt -->
+        <div id="connectPrompt" style="text-align: center; padding: 60px 20px; color: #666;">
+            <div style="font-size: 64px; margin-bottom: 20px;">🎲</div>
+            <div style="font-size: 24px; margin-bottom: 10px; color: #fff;">Connect Your Wallet</div>
+            <div style="font-size: 16px;">Click "Connect Wallet" in the top right to start playing</div>
+        </div>
+    </div>
+
+    <!-- Rules Modal -->
+    <div class="modal-overlay" id="rulesModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">Game Rules</h2>
+                <button class="modal-close" id="closeRulesBtn">&times;</button>
+            </div>
+            <div class="modal-content">
+                <div class="rules-highlight">
+                    <strong style="color: #667eea;">How It Works:</strong><br>
+                    Predict income levels from demographic data and win MON tokens!
+                </div>
+
+                <h3>🎯 Gameplay</h3>
+                <ul>
+                    <li>Enter your bet amount in MON tokens</li>
+                    <li>View the demographic data (5 features shown)</li>
+                    <li>Predict if income is ≤50K or >50K</li>
+                    <li>Click "STAKE NOW" to place your bet</li>
+                    <li>MetaMask will popup to confirm transaction</li>
+                </ul>
+
+                <h3>💰 Payouts</h3>
+                <ul>
+                    <li><strong style="color: #48bb78;">Correct Prediction:</strong> Win 130% of your bet (+30% profit)
+                    </li>
+                    <li><strong style="color: #ff6b6b;">Wrong Prediction:</strong> Get 80% of your bet back (-20% loss)
+                    </li>
+                </ul>
+
+                <h3>📊 Example</h3>
+                <ul>
+                    <li>Bet 10 MON, predict correctly → Receive 13 MON</li>
+                    <li>Bet 10 MON, predict wrong → Receive 8 MON</li>
+                </ul>
+
+                <h3>⚡ Tips</h3>
+                <ul>
+                    <li>All data is shown before you place your bet</li>
+                    <li>Make sure you have enough MON in your wallet</li>
+                    <li>Transactions are processed on Monad blockchain</li>
+                    <li>Results are instant and transparent</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2026 STAKE Game. Predict. Win. Repeat.</p>
+    </footer>
+
+    <script>
+        // Session wallet for arcade mode
+        let sessionWallet = null;
+        let isArcadeMode = false;
+
+        // Initialize session wallet (load from storage or create new)
+        function initSessionWallet() {
+            if (sessionWallet) return sessionWallet;
+
+            // Try to load from localStorage
+            const savedKey = localStorage.getItem('sessionWalletPrivateKey');
+            if (savedKey) {
+                try {
+                    sessionWallet = new ethers.Wallet(savedKey);
+                    console.log('Session wallet loaded from storage:', sessionWallet.address);
+                } catch (e) {
+                    console.error('Failed to load session wallet, creating new one');
+                    sessionWallet = ethers.Wallet.createRandom();
+                    localStorage.setItem('sessionWalletPrivateKey', sessionWallet.privateKey);
+                }
+            } else {
+                sessionWallet = ethers.Wallet.createRandom();
+                localStorage.setItem('sessionWalletPrivateKey', sessionWallet.privateKey);
+                console.log('New session wallet created:', sessionWallet.address);
+            }
+            return sessionWallet;
+        }
+
+        // Update session wallet balance display
+        async function updateSessionBalance() {
+            if (!sessionWallet || !window.ethereum) return;
+            try {
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                const balance = await provider.getBalance(sessionWallet.address);
+                const balanceInMon = ethers.utils.formatEther(balance);
+                const balanceEl = document.getElementById('arcadeBalance');
+                if (balanceEl) {
+                    balanceEl.textContent = parseFloat(balanceInMon).toFixed(4);
+                }
+            } catch (err) {
+                console.error('Error updating session balance:', err);
+            }
+        }
+
+        // Arcade Mode Toggle Handler
+        document.getElementById('arcadeModeToggle').addEventListener('change', (e) => {
+            isArcadeMode = e.target.checked;
+            console.log('Arcade Mode:', isArcadeMode);
+
+            if (isArcadeMode) {
+                initSessionWallet();
+                updateSessionBalance();
+            }
+        });
+
+        // Deposit Button Handler - Transfer from main wallet to session wallet
+        document.getElementById('depositBtn').addEventListener('click', async () => {
+            if (!gameState.connectedAddress) {
+                showStatus('Please connect your wallet first', 'error');
+                return;
+            }
+
+            initSessionWallet();
+
+            const amount = prompt('Enter amount to deposit (in MON):', '1.0');
+            if (!amount || parseFloat(amount) <= 0) {
+                showStatus('Invalid amount', 'error');
+                return;
+            }
+
+            try {
+                showStatus('Processing deposit...', 'info');
+
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                const signer = provider.getSigner();
+
+                const tx = await signer.sendTransaction({
+                    to: sessionWallet.address,
+                    value: ethers.utils.parseEther(amount)
+                });
+
+                showStatus('Deposit pending...', 'info');
+                await tx.wait();
+
+                showStatus(`✅ Deposited ${amount} MON to Arcade Wallet!`, 'success');
+                updateSessionBalance();
+            } catch (err) {
+                console.error('Deposit error:', err);
+                if (err.code === 4001) {
+                    showStatus('Deposit cancelled', 'error');
+                } else {
+                    showStatus('Deposit failed: ' + (err.message || 'Unknown error'), 'error');
+                }
+            }
+        });
+
+        // Withdraw Button Handler - Transfer all from session wallet back to main wallet
+        document.getElementById('withdrawBtn').addEventListener('click', async () => {
+            if (!gameState.connectedAddress) {
+                showStatus('Please connect your wallet first', 'error');
+                return;
+            }
+
+            if (!sessionWallet) {
+                showStatus('No session wallet found', 'error');
+                return;
+            }
+
+            try {
+                showStatus('Processing withdrawal...', 'info');
+
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                const connectedSessionWallet = sessionWallet.connect(provider);
+
+                // Get current balance
+                const balance = await provider.getBalance(sessionWallet.address);
+
+                if (balance.eq(0)) {
+                    showStatus('Session wallet is empty', 'error');
+                    return;
+                }
+
+                // Estimate gas cost and subtract from amount
+                const gasPrice = await provider.getGasPrice();
+                const gasLimit = 21000; // Standard transfer
+                const gasCost = gasPrice.mul(gasLimit);
+
+                const amountToSend = balance.sub(gasCost);
+
+                if (amountToSend.lte(0)) {
+                    showStatus('Balance too low to cover gas fees', 'error');
+                    return;
+                }
+
+                const tx = await connectedSessionWallet.sendTransaction({
+                    to: gameState.connectedAddress,
+                    value: amountToSend,
+                    gasLimit: gasLimit
+                });
+
+                showStatus('Withdrawal pending...', 'info');
+                await tx.wait();
+
+                const withdrawnAmount = ethers.utils.formatEther(amountToSend);
+                showStatus(`✅ Withdrew ${parseFloat(withdrawnAmount).toFixed(4)} MON to your wallet!`, 'success');
+                updateSessionBalance();
+            } catch (err) {
+                console.error('Withdraw error:', err);
+                showStatus('Withdrawal failed: ' + (err.message || 'Unknown error'), 'error');
+            }
+        });
+
+        // Verify network and switch if needed
+        async function verifyNetwork() {
+            if (!window.ethereum) return false;
+            try {
+                const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+                const monadChainIds = ['0x279f', '0xe3f0'];
+                const isOnMonad = monadChainIds.some(id => chainId.toLowerCase() === id.toLowerCase());
+
+                if (!isOnMonad) {
+                    // Try to switch
+                    for (const id of monadChainIds) {
+                        try {
+                            await window.ethereum.request({
+                                method: 'wallet_switchEthereumChain',
+                                params: [{ chainId: id }]
+                            });
+                            return true;
+                        } catch (e) {
+                            continue;
+                        }
+                    }
+                    return false;
+                }
+                return true;
+            } catch (err) {
+                console.error('Network verification error:', err);
+                return false;
+            }
+        }
+
+        // Global state
+        const gameState = {
+            connectedAddress: null,
+            betAmount: null,
+            selectedPrediction: null,
+            dataRows: [],
+            currentRowIndex: null,
+            contractAddress: '0xF289Bb3a57238A7B6f6cE3894e487FF8e9dDa088', // Single transaction contract
+            poolStats: { pool: 0, wagered: 0, paid: 0 },
+            contractABI: [
+                {
+                    "inputs": [{ "internalType": "bool", "name": "isCorrect", "type": "bool" }],
+                    "name": "playGame",
+                    "outputs": [],
+                    "stateMutability": "payable",
+                    "type": "function"
+                }
+            ]
+        };
+
+        // Load CSV data
+        async function loadCSV() {
+            try {
+                const response = await fetch('adult.csv');
+                const csvText = await response.text();
+                const lines = csvText.split('\n').filter(line => line.trim());
+                const headers = lines[0].split(',');
+
+                for (let i = 1; i < lines.length; i++) {
+                    const values = lines[i].split(',');
+                    const row = {};
+                    headers.forEach((header, idx) => {
+                        row[header.trim()] = values[idx]?.trim() || '';
+                    });
+                    gameState.dataRows.push(row);
+                }
+
+                console.log(`Loaded ${gameState.dataRows.length} prediction rows`);
+            } catch (err) {
+                showStatus('Error loading dataset', 'error');
+                console.error(err);
+            }
+        }
+
+        // Show status message
+        function showStatus(message, type = 'info') {
+            const container = document.getElementById('statusContainer');
+            const messageEl = document.createElement('div');
+            messageEl.className = `status-message ${type}`;
+            messageEl.textContent = message;
+            container.innerHTML = '';
+            container.appendChild(messageEl);
+
+            if (type === 'success' || type === 'error') {
+                setTimeout(() => {
+                    messageEl.remove();
+                }, 5000);
+            }
+        }
+
+        // Connect wallet and switch to Monad testnet
+        document.getElementById('connectWalletBtn').addEventListener('click', async () => {
+            if (!window.ethereum) {
+                showStatus('MetaMask is not installed. Please install it to play.', 'error');
+                return;
+            }
+
+            if (typeof ethers === 'undefined') {
+                showStatus('Ethers.js library not loaded. Please refresh the page.', 'error');
+                return;
+            }
+
+            try {
+                // Step 1: Request accounts
+                showStatus('Connecting wallet...', 'info');
+                const accounts = await window.ethereum.request({
+                    method: 'eth_requestAccounts'
+                });
+
+                if (!accounts || accounts.length === 0) {
+                    throw new Error('No accounts found');
+                }
+
+                gameState.connectedAddress = accounts[0];
+
+                // Step 2: Switch to Monad Testnet
+                // Try both possible chain IDs (0x279f and 0xe3f0)
+                const monadChainIds = ['0x279f', '0xe3f0']; // Monad Testnet chain IDs
+                let currentChainId = await window.ethereum.request({ method: 'eth_chainId' });
+                currentChainId = currentChainId.toLowerCase();
+
+                // Check if already on a Monad network
+                const isOnMonad = monadChainIds.some(id => currentChainId === id.toLowerCase());
+
+                if (!isOnMonad) {
+                    // Try to switch to Monad - try both chain IDs
+                    let switched = false;
+                    for (const chainId of monadChainIds) {
+                        try {
+                            showStatus('Switching to Monad Testnet...', 'info');
+                            await window.ethereum.request({
+                                method: 'wallet_switchEthereumChain',
+                                params: [{ chainId: chainId }]
+                            });
+                            switched = true;
+                            currentChainId = chainId.toLowerCase();
+                            break;
+                        } catch (switchError) {
+                            // If chain not found (4902), try next chain ID
+                            if (switchError.code === 4902) {
+                                continue;
+                            }
+                            // If user rejected, throw
+                            if (switchError.code === 4001) {
+                                throw new Error('User rejected network switch');
+                            }
+                            // Other errors, try next chain ID
+                            continue;
+                        }
+                    }
+
+                    // If switching failed, try to add network (only if both failed)
+                    if (!switched) {
+                        // Use the first chain ID for adding (0x279f seems to be the one already in MetaMask)
+                        const chainIdToAdd = '0x279f';
+                        try {
+                            showStatus('Adding Monad Testnet to MetaMask...', 'info');
+                            await window.ethereum.request({
+                                method: 'wallet_addEthereumChain',
+                                params: [{
+                                    chainId: chainIdToAdd,
+                                    chainName: 'Monad Testnet',
+                                    rpcUrls: ['https://testnet-rpc.monad.xyz'],
+                                    nativeCurrency: {
+                                        name: 'MON',
+                                        symbol: 'MON',
+                                        decimals: 18
+                                    },
+                                    blockExplorerUrls: ['https://testnet.monadexplorer.com/']
+                                }]
+                            });
+                            // After adding, switch to it
+                            await window.ethereum.request({
+                                method: 'wallet_switchEthereumChain',
+                                params: [{ chainId: chainIdToAdd }]
+                            });
+                            currentChainId = chainIdToAdd.toLowerCase();
+                        } catch (addError) {
+                            // If adding fails because network already exists, just switch to it
+                            if (addError.message && addError.message.includes('same RPC endpoint')) {
+                                // Network exists with different chain ID, just switch to 0x279f
+                                try {
+                                    await window.ethereum.request({
+                                        method: 'wallet_switchEthereumChain',
+                                        params: [{ chainId: '0x279f' }]
+                                    });
+                                    currentChainId = '0x279f';
+                                } catch (e) {
+                                    throw new Error('Please manually switch to Monad Testnet in MetaMask');
+                                }
+                            } else {
+                                throw addError;
+                            }
+                        }
+                    }
+                }
+
+                // Step 3: Verify we're on a Monad chain
+                const finalChainId = (await window.ethereum.request({ method: 'eth_chainId' })).toLowerCase();
+                const isOnMonadFinal = monadChainIds.some(id => finalChainId === id.toLowerCase());
+
+                if (!isOnMonadFinal) {
+                    throw new Error('Please switch to Monad Testnet manually. Current chain: ' + finalChainId);
+                }
+
+                // Step 4: Update UI
+                updateWalletDisplay();
+                document.getElementById('connectPrompt').classList.add('hidden');
+                document.getElementById('mainGame').classList.remove('hidden');
+                document.getElementById('arcadePanel').classList.remove('hidden');
+                showStatus('Wallet connected to Monad Testnet!', 'success');
+
+                // Initialize session wallet and prompt for deposit
+                initSessionWallet();
+
+                // Always prompt for deposit on first connection
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                const sessionBalance = await provider.getBalance(sessionWallet.address);
+
+                setTimeout(async () => {
+                    if (sessionBalance.lt(ethers.utils.parseEther("0.01"))) {
+                        // Session wallet is empty or nearly empty - prompt for deposit
+                        const depositAmount = prompt(
+                            "💎 Welcome to Arcade Mode!\n\n" +
+                            "Deposit MON to your session wallet for instant betting without MetaMask popups.\n\n" +
+                            `Session Wallet: ${sessionWallet.address.substring(0, 10)}...${sessionWallet.address.substring(38)}\n\n` +
+                            "Enter amount to deposit (recommended: 1-10 MON):"
+                        );
+
+                        if (depositAmount && !isNaN(depositAmount) && parseFloat(depositAmount) > 0) {
+                            try {
+                                showStatus('Processing deposit to session wallet...', 'info');
+                                const signer = provider.getSigner();
+                                const tx = await signer.sendTransaction({
+                                    to: sessionWallet.address,
+                                    value: ethers.utils.parseEther(depositAmount.toString())
+                                });
+
+                                showStatus('⏳ Waiting for confirmation...', 'info');
+                                await tx.wait();
+
+                                showStatus('✅ Deposit successful! Ready for fast betting!', 'success');
+                                await updateSessionBalance();
+                            } catch (err) {
+                                if (err.code === 4001) {
+                                    showStatus('Deposit cancelled. You can deposit later using the button below.', 'info');
+                                } else {
+                                    showStatus('Deposit failed: ' + err.message, 'error');
+                                }
+                            }
+                        } else if (depositAmount !== null) {
+                            showStatus('You can deposit later using the "💰 Deposit to Arcade" button', 'info');
+                        }
+                    } else {
+                        // Already has balance
+                        await updateSessionBalance();
+                        showStatus(`✅ Session wallet ready with ${ethers.utils.formatEther(sessionBalance).substring(0, 6)} MON`, 'success');
+                    }
+                }, 800);
+            } catch (err) {
+                showStatus('Failed to connect: ' + err.message, 'error');
+                console.error(err);
+            }
+        });
+
+        // Update wallet display
+        function updateWalletDisplay() {
+            const btn = document.getElementById('connectWalletBtn');
+            if (gameState.connectedAddress) {
+                const shortAddress = `${gameState.connectedAddress.substring(0, 6)}...${gameState.connectedAddress.substring(38)}`;
+                btn.textContent = shortAddress;
+                btn.classList.add('connected');
+                btn.disabled = true;
+            }
+        }
+
+        // Handle bet amount input - show data immediately ONLY if not already shown
+        document.getElementById('betAmountInput').addEventListener('input', (e) => {
+            const value = parseFloat(e.target.value);
+            if (value > 0) {
+                gameState.betAmount = value;
+                // Only load new data if we haven't selected a row yet
+                if (gameState.currentRowIndex === null) {
+                    displayRandomRow();
+                }
+            } else {
+                // Determine logic for when input is cleared:
+                // Option A: Hide data (Reset) - Chosen for cleaner UI
+                // Option B: Keep data
+                if (!value) {
+                    document.getElementById('emptyState').classList.remove('hidden');
+                    document.getElementById('dataGrid').classList.add('hidden');
+                    gameState.currentRowIndex = null; // Reset ensures next valid input gives NEW data
+                }
+            }
+            document.getElementById('placeBetBtn').disabled = !gameState.selectedPrediction || !value;
+        });
+
+        // Handle prediction selection
+        document.querySelectorAll('.prediction-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.prediction-btn').forEach(b => b.classList.remove('selected'));
+                e.target.classList.add('selected');
+                gameState.selectedPrediction = e.target.dataset.prediction === 'true';
+                const hasAmount = gameState.betAmount && gameState.betAmount > 0;
+                document.getElementById('placeBetBtn').disabled = !hasAmount;
+            });
+        });
+
+        // TIMER LOGIC
+        let timerInterval;
+        const TIMER_DURATION = 10;
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            const bar = document.getElementById('timerBar');
+            const text = document.getElementById('timerDigits');
+            let timeLeft = TIMER_DURATION;
+
+            // Reset UI
+            bar.style.transition = 'none';
+            bar.style.width = '100%';
+            bar.offsetHeight; // Trigger reflow
+
+            // Start animation
+            bar.style.transition = `width ${TIMER_DURATION}s linear`;
+            bar.style.width = '0%';
+            text.textContent = `${timeLeft}s`;
+            text.style.color = '#fff';
+
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                text.textContent = `${timeLeft}s`;
+
+                // Color warnings
+                if (timeLeft <= 3) text.style.color = '#ff0000';
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    // Time expired - refresh data
+                    const grid = document.getElementById('dataGrid');
+                    grid.style.opacity = '0.5';
+                    setTimeout(() => {
+                        displayRandomRow(); // This will restart the timer recursively
+                        grid.style.opacity = '1';
+                    }, 200);
+                }
+            }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+            const bar = document.getElementById('timerBar');
+            if (bar) {
+                const computedWidth = window.getComputedStyle(bar).width;
+                bar.style.transition = 'none';
+                bar.style.width = computedWidth;
+            }
+        }
+
+        // Display random row with better formatting
+        function displayRandomRow() {
+            if (gameState.dataRows.length === 0) {
+                showStatus('Dataset not loaded', 'error');
+                return;
+            }
+
+            gameState.currentRowIndex = Math.floor(Math.random() * gameState.dataRows.length);
+            const row = gameState.dataRows[gameState.currentRowIndex];
+
+            const features = [
+                { key: 'marital-status', label: 'Marital Status' },
+                { key: 'occupation', label: 'Occupation' },
+                { key: 'relationship', label: 'Relationship' },
+                { key: 'race', label: 'Race' },
+                { key: 'gender', label: 'Gender' }
+            ];
+
+            let html = '';
+            features.forEach(feature => {
+                const value = row[feature.key] || 'N/A';
+                html += `
+                    <div class="data-item">
+                        <div class="data-label">${feature.label}</div>
+                        <div class="data-value">${value}</div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('dataGrid').innerHTML = html;
+            document.getElementById('emptyState').classList.add('hidden');
+            document.getElementById('dataGrid').classList.remove('hidden');
+
+            // START THE TIMER whenever new data is shown
+            startTimer();
+        }
+
+        // Verify we're on Monad testnet (accepts both 0x279f and 0xe3f0)
+        async function verifyNetwork() {
+            if (!window.ethereum) return false;
+            try {
+                const currentChainId = await window.ethereum.request({ method: 'eth_chainId' });
+                // Normalize chain IDs for comparison (handle both string and hex)
+                const normalizedCurrent = currentChainId.toLowerCase();
+                const monadChainIds = ['0x279f', '0xe3f0'];
+                return monadChainIds.some(id => normalizedCurrent === id.toLowerCase());
+            } catch (err) {
+                console.error('Error verifying network:', err);
+                return false;
+            }
+        }
+
+        // Listen for chain changes
+        if (window.ethereum) {
+            window.ethereum.on('chainChanged', (chainId) => {
+                const normalizedChainId = chainId.toLowerCase();
+                const monadChainIds = ['0x279f', '0xe3f0'];
+                const isMonad = monadChainIds.some(id => normalizedChainId === id.toLowerCase());
+
+                if (!isMonad) {
+                    showStatus('Please switch to Monad Testnet to continue', 'error');
+                    // Optionally hide game if not on correct network
+                    if (gameState.connectedAddress) {
+                        document.getElementById('mainGame').classList.add('hidden');
+                        document.getElementById('connectPrompt').classList.remove('hidden');
+                    }
+                } else {
+                    showStatus('Connected to Monad Testnet', 'success');
+                }
+            });
+        }
+
+        // Place bet - simplified due to extracted handler
+        document.getElementById('placeBetBtn').addEventListener('click', handlePlaceBet);
+
+        // SEPARATE HANDLER FOR BETTING TO SUPPORT BOTH MODES
+        async function handlePlaceBet() {
+            if (!gameState.connectedAddress) {
+                showStatus('Please connect wallet first', 'error');
+                return;
+            }
+            if (!gameState.betAmount || gameState.selectedPrediction === null) {
+                showStatus('Please complete all fields', 'error');
+                return;
+            }
+
+            // Verify network (only needed for main wallet per-transaction interaction)
+            if (!isArcadeMode) {
+                const isOnMonad = await verifyNetwork();
+                if (!isOnMonad) {
+                    showStatus('Please switch to Monad Testnet!', 'error');
+                    return;
+                }
+            }
+
+            if (typeof ethers === 'undefined') {
+                showStatus('Ethers.js library not loaded. Please refresh.', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('placeBetBtn');
+            const originalText = 'STAKE NOW';
+
+            // Stop timer immediately
+            stopTimer();
+
+            btn.innerHTML = '<span class="loader"></span>Processing...';
+            btn.disabled = true;
+
+            try {
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                let signer;
+
+                if (isArcadeMode) {
+                    // ARCADE MODE: Use session wallet
+                    if (!sessionWallet) initSessionWallet();
+
+                    // Check session balance
+                    const sessionBalance = await provider.getBalance(sessionWallet.address);
+                    const betWei = ethers.utils.parseEther(gameState.betAmount.toString());
+                    const gasBuffer = ethers.utils.parseEther("0.001");
+
+                    if (sessionBalance.lt(betWei.add(gasBuffer))) {
+                        throw new Error(`Insufficient Arcade Balance! Please DEPOSIT more funds.`);
+                    }
+
+                    // Use session wallet as signer
+                    signer = sessionWallet.connect(provider);
+                    showStatus('⚡ Speed Bet initiated...', 'info');
+                } else {
+                    // NORMAL MODE: Use MetaMask
+                    signer = provider.getSigner();
+                    showStatus('Confirm transaction in MetaMask...', 'info');
+                }
+
+                // Create contract instance
+                const contract = new ethers.Contract(
+                    gameState.contractAddress,
+                    gameState.contractABI,
+                    signer
+                );
+
+                // Parse bet amount to wei
+                const betAmountWei = ethers.utils.parseEther(gameState.betAmount.toString());
+
+                // Get the actual income label from dataset
+                const actualLabel = gameState.dataRows[gameState.currentRowIndex]['income'];
+                const correctLabel = actualLabel === '>50K';
+                const isCorrect = gameState.selectedPrediction === correctLabel;
+
+                // Single transaction
+                const tx = await contract.playGame(isCorrect, {
+                    value: betAmountWei
+                });
+
+                if (!isArcadeMode) showStatus('Processing bet...', 'info');
+
+                // Wait for transaction
+                const receipt = await tx.wait();
+
+                if (!receipt || receipt.status === 0) {
+                    throw new Error('Transaction was reverted');
+                }
+
+                // Show result
+                let payout, message;
+                if (isCorrect) {
+                    // Display purposes only: Backend pays 100%
+                    payout = (gameState.betAmount * 1.3).toFixed(4);
+                    message = `🎉 Correct! 130% = ${payout} MON`;
+                } else {
+                    payout = (gameState.betAmount * 0.8).toFixed(4);
+                    message = `😔 Wrong! Actual: ${actualLabel}. 80% = ${payout} MON`;
+                }
+
+                showStatus(message, isCorrect ? 'success' : 'error');
+
+                // Update session balance immediately
+                if (isArcadeMode) updateSessionBalance();
+
+                // Reset for next round
+                setTimeout(() => {
+                    document.querySelectorAll('.prediction-btn').forEach(b => b.classList.remove('selected'));
+                    gameState.selectedPrediction = null;
+
+                    document.getElementById('placeBetBtn').innerHTML = 'STAKE NOW';
+                    document.getElementById('placeBetBtn').disabled = false;
+
+                    console.log('Loading new random row...');
+                    displayRandomRow();
+                    console.log('New row index:', gameState.currentRowIndex);
+                }, isArcadeMode ? 1000 : 3000);
+
+            } catch (err) {
+                console.error('Transaction error:', err);
+                let errorMessage = 'Transaction failed: ';
+                if (err.message && err.message.includes("Insufficient Arcade Balance")) {
+                    errorMessage = err.message;
+                } else if (err.code === 4001 || (err.message && err.message.includes('user rejected'))) {
+                    errorMessage = 'Transaction cancelled by user';
+                } else if (err.data && err.data.message) {
+                    errorMessage += err.data.message;
+                } else {
+                    errorMessage += err.message || 'Unknown error';
+                }
+
+                showStatus(errorMessage, 'error');
+                btn.innerHTML = 'STAKE NOW';
+                btn.disabled = false;
+            }
+        }
+
+        // Initialize on DOM ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+
+        function init() {
+            // Check if ethers is loaded
+            if (typeof ethers === 'undefined') {
+                console.error('Ethers.js failed to load!');
+                showStatus('Error: Ethers.js library not loaded. Please check your internet connection and refresh.', 'error');
+                return;
+            } else {
+                console.log('✓ Ethers.js loaded successfully');
+            }
+
+            // Default to Arcade Mode ON
+            isArcadeMode = true;
+            document.getElementById('arcadeModeToggle').checked = true;
+            document.getElementById('arcadePanel').classList.remove('hidden');
+
+            // Initialize session wallet
+            initSessionWallet();
+
+            // Load CSV data
+            loadCSV();
+
+            // Start periodic balance updates
+            setInterval(updateSessionBalance, 5000);
+        }
+    </script>
+</body>
+
+</html>
