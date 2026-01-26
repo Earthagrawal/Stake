@@ -9,7 +9,7 @@
 
 ## 📖 Overview
 
-**MonStack** is a minimal, high-frequency prediction game where players analyze real-time demographic data to predict income levels. Built for speed and simplicity, it leverages the **Monad Blockchain** to offer instant settlements and transparent payouts.
+**MonStake** is a minimal, high-frequency prediction game where players analyze real-time demographic data to predict income levels. Built for speed and simplicity, it leverages the **Monad Blockchain** to offer instant settlements and transparent payouts.
 
 Players are presented with 5 key demographic features (e.g., Age, Education, Occupation) and must predict within 10 seconds whether the individual's income is **≤ 50K** or **> 50K**.
 
