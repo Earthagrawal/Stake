@@ -118,6 +118,33 @@ The game is currently configured for **Monad Testnet**.
 - **RPC URL**: `https://testnet-rpc.monad.xyz`
 - **Chain ID**: `10143` (0x279f)
 
+## 🚀 NodeOps Deployment
+
+Deploy STAKE to the NodeOps network and earn $NODE tokens!
+
+### Quick Start
+
+```bash
+# 1. Test locally with Docker (optional)
+docker build -t stake-game .
+docker run -p 8080:80 stake-game
+
+# 2. Push to GitHub
+git push origin main
+
+# 3. Deploy via NodeOps AutoGen V2
+# Visit: https://app.nodeops.xyz
+# Paste your GitHub repo URL and let the AI handle the rest!
+```
+
+📖 **Full deployment guide**: See [NODEOPS_DEPLOYMENT.md](NODEOPS_DEPLOYMENT.md)
+
+### Why NodeOps?
+- ✅ **AI-Powered Deployment**: Just paste your repo URL
+- ✅ **Automatic SSL & Subdomains**: No configuration needed
+- ✅ **Earn $NODE Tokens**: Passive rewards for active projects
+- ✅ **Free Up Your Laptop**: All hosting runs on NodeOps infrastructure
+
 ## 📄 License
 
 This project is licensed under the MIT License - see the LICENSE file for details.

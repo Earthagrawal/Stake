@@ -1,0 +1,37 @@
+# Node modules
+node_modules/
+npm-debug.log
+
+# Git
+.git/
+.gitignore
+
+# Environment variables (security)
+.env
+.env.local
+
+# Development files
+hardhat.config.js
+scripts/
+contracts/
+artifacts/
+cache/
+deployments/
+deploy-simple.js
+
+# Documentation
+docs/
+README.md
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
