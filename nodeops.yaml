@@ -1,0 +1,42 @@
+apiVersion: nodeops.xyz/v1
+kind: Application
+metadata:
+  name: monstake
+  description: STAKE - Web3 Prediction Game on Monad Blockchain
+
+spec:
+  # Deployment configuration
+  deployment:
+    type: web
+    replicas: 1
+    
+  # Container configuration
+  container:
+    image: auto-build
+    port: 80
+    
+  # Build configuration
+  build:
+    dockerfile: ./Dockerfile
+    context: .
+    
+  # Resource allocation
+  resources:
+    cpu: 200
+    memory: 500
+    
+  # Networking
+  networking:
+    expose: true
+    domain: auto
+    ssl: true
+    
+  # Health checks
+  healthCheck:
+    path: /
+    port: 80
+    interval: 30s
+    timeout: 5s
+    
+  # Environment (optional - currently not used)
+  environment: []
